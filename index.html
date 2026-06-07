@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord Másolat - Téma váltóval</title>
+    <title>Discord Szimulátor</title>
     <style>
-        /* SÖTÉT MÓD ALAPÉRTELMEZETT STÍLUSAI */
         body {
             background-color: #313338;
             color: #dbdee1;
@@ -13,20 +12,55 @@
             margin: 0;
             display: flex;
             height: 100vh;
-            transition: all 0.3s ease; /* Finom átmenet a váltáskor */
+            overflow: hidden;
         }
         .szerverek {
             background-color: #1e1f22;
             width: 70px;
             padding: 10px 0;
-            text-align: center;
-            transition: background-color 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .szerver-ikon {
+            width: 48px;
+            height: 48px;
+            background-color: #313338;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: 0.2s;
+        }
+        .szerver-ikon:hover {
+            border-radius: 30%;
+            background-color: #5865F2;
         }
         .csatornak {
             background-color: #2b2d31;
             width: 240px;
             padding: 20px;
-            transition: background-color 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .csatorna-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .csatorna-nev {
+            color: #949ba4;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .csatorna-nev:hover, .csatorna-nev.active {
+            background-color: #35373c;
+            color: #dbdee1;
         }
         .csevegő {
             background-color: #313338;
@@ -36,12 +70,11 @@
             justify-content: space-between;
             padding: 20px;
             position: relative;
-            transition: background-color 0.3s;
         }
-        .csatorna-nev {
-            color: #949ba4;
-            margin: 10px 0;
-            cursor: pointer;
+        .chat-tartalom {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
         }
         .uzenet {
             margin-bottom: 15px;
@@ -57,99 +90,178 @@
             border-radius: 8px;
             color: #dbdee1;
             width: 95%;
-            transition: background-color 0.3s, color 0.3s;
         }
-
-        /* GOMB STÍLUSA */
         .valto-gomb {
             position: absolute;
             top: 20px;
             right: 20px;
-            padding: 10px 15px;
-            background-color: #5865F2;
+            padding: 8px 12px;
+            background-color: #4e5058;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
         }
-
-        /* VILÁGOS (FEHÉR-FEKETE) MÓD STÍLUSA */
-        body.light-mode {
-            background-color: #ffffff;
-            color: #000000;
+        .hang-statusz {
+            background-color: #232428;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
         }
-        body.light-mode .szerverek {
-            background-color: #e3e5e8;
+        .zold-pont {
+            width: 10px;
+            height: 10px;
+            background-color: #23a55a;
+            border-radius: 50%;
         }
-        body.light-mode .csatornak {
-            background-color: #f2f3f5;
-        }
-        body.light-mode .csevegő {
-            background-color: #ffffff;
-        }
-        body.light-mode .felhasznalo {
-            color: #060607;
-        }
-        body.light-mode .csatorna-nev {
-            color: #4e5058;
-        }
-        body.light-mode .beviteli-mezo {
-            background-color: #ebedef;
-            color: #060607;
-            border: 1px solid #ccc;
-        }
+        /* VILÁGOS MÓD */
+        body.light-mode { background-color: #fff; color: #000; }
+        body.light-mode .szerverek { background-color: #e3e5e8; }
+        body.light-mode .csatornak { background-color: #f2f3f5; }
+        body.light-mode .csevegő { background-color: #fff; }
+        body.light-mode .beviteli-mezo { background-color: #ebedef; color: #000; border: 1px solid #ccc; }
+        body.light-mode .felhasznalo { color: #000; }
     </style>
 </head>
 <body>
 
-    <!-- 1. Bal oldali sáv -->
-    <div class="szerverek">
-        <h3 style="color: #5865F2;">🎮</h3>
-        <p>🏠</p>
-        <p>➕</p>
+    <!-- 1. SZERVER LISTA -->
+    <div class="szerverek" id="szerverLista">
+        <div class="szerver-ikon" style="background-color: #5865F2;">🎮</div>
+        <div class="szerver-ikon" onclick="ujSzerver()">➕</div>
     </div>
 
-    <!-- 2. Középső sáv -->
+    <!-- 2. CSATORNA LISTA -->
     <div class="csatornak">
-        <h2>Saját Szerver</h2>
-        <hr style="border-color: #3f4147;">
-        <p style="font-size: 12px; text-transform: uppercase;">Szöveges csatornák</p>
-        <div class="csatorna-nev"># 💬 általános</div>
-        <div class="csatorna-nev"># 🤖 bot-parancsok</div>
-        <div class="csatorna-nev"># 📷 mémek</div>
-    </div>
-
-    <!-- 3. Jobb oldali rész -->
-    <div class="csevegő">
-        <!-- Ez a gomb fogja kapcsolni a módot -->
-        <button class="valto-gomb" onclick="temaValtas()">Sötét / Világos mód</button>
-
         <div>
-            <h2># általános</h2>
+            <h2 id="szerverNev">Saját Szerver</h2>
             <hr style="border-color: #3f4147;">
-            
-            <div class="uzenet">
-                <span class="felhasznalo">Admin_Péter</span>
-                <p style="margin: 5px 0 0 0;">Sziasztok! Próbáljátok ki a jobb felső sarokban lévő gombot!</p>
-            </div>
-
-            <div class="uzenet">
-                <span class="felhasznalo">TesztElek</span>
-                <p style="margin: 5px 0 0 0;">Wow, ez azonnal átvált fehér-fekete módra! 🌓</p>
+            <p style="font-size: 12px; color: #949ba4; text-transform: uppercase;">Csatornák</p>
+            <div class="csatorna-lista">
+                <div class="csatorna-nev active" onclick="valtsCsatornat('általános', this)"># 💬 általános</div>
+                <div class="csatorna-nev" onclick="valtsCsatornat('bot-parancsok', this)"># 🤖 bot-parancsok</div>
+                <div class="csatorna-nev" onclick="valtsCsatornat('mémek', this)"># 📷 mémek</div>
+                <div class="csatorna-nev" onclick="hanghozCsatlakozik('Általános Hang')"># 🔊 Általános Hang</div>
             </div>
         </div>
 
-        <input type="text" class="beviteli-mezo" placeholder="Üzenet küldése a(z) #általános csatornába">
+        <!-- Hanghívás jelző (alul) -->
+        <div class="hang-statusz" id="hangPanel" style="display: none;">
+            <div class="zold-pont"></div>
+            <div>
+                <span style="color: #23a55a; font-weight: bold;">Hang kapcsolat kész</span><br>
+                <span id="hangCsatornaNev" style="color: #949ba4; font-size: 12px;"></span>
+            </div>
+            <button onclick="bontas()" style="background:none; border:none; color:#f23f43; cursor:pointer; font-weight:bold; margin-left:auto;">❌</button>
+        </div>
     </div>
 
-    <!-- JAVASCRIPT KÓD A VÁLTÁSHOZ -->
+    <!-- 3. CHAT ABLAK -->
+    <div class="csevegő">
+        <button class="valto-gomb" onclick="temaValtas()">🌓 Mód</button>
+        
+        <div>
+            <h2 id="aktualisCsatorna"># általános</h2>
+            <hr style="border-color: #3f4147;">
+            
+            <div class="chat-tartalom" id="chatDoboz">
+                <div class="uzenet">
+                    <span class="felhasznalo">Rendszer</span>
+                    <p style="margin: 5px 0 0 0;">Üdvözlünk a csatornán! Írj be egy üzenetet alulra.</p>
+                </div>
+            </div>
+        </div>
+
+        <input type="text" class="beviteli-mezo" id="uzenetInput" placeholder="Üzenet küldése..." onkeypress="uzenetKuld(event)">
+    </div>
+
     <script>
+        // Üzenetek tárolása memóriában csatornák szerint
+        let uzenetek = {
+            'általános': [{ki: 'Rendszer', mi: 'Üdv a főcsatornán!'}],
+            'bot-parancsok': [{ki: 'Mee6 Bot', mi: 'Írd be, hogy !help a parancsokért.'}],
+            'mémek': [{ki: 'Admin', mi: 'Ide csak vicces képeket küldjetek!'}]
+        };
+        
+        let jelenlegiCsatorna = 'általános';
+
+        // Téma váltó
         function temaValtas() {
-            // A JavaScript hozzáadja vagy elveszi a "light-mode" osztályt a teljes oldalból (body)
             document.body.classList.toggle("light-mode");
         }
-    </script>
 
+        // Csatorna váltás
+        function valtsCsatornat(nev, elem) {
+            jelenlegiCsatorna = nev;
+            document.getElementById('aktualisCsatorna').innerText = '# ' + nev;
+            
+            document.querySelectorAll('.csatorna-nev').forEach(c => c.classList.remove('active'));
+            elem.classList.add('active');
+            
+            frissitChatet();
+        }
+
+        // Chat frissítése
+        function frissitChatet() {
+            let doboz = document.getElementById('chatDoboz');
+            doboz.innerHTML = '';
+            
+            if(uzenetek[jelenlegiCsatorna]) {
+                uzenetek[jelenlegiCsatorna].forEach(u => {
+                    doboz.innerHTML += `<div class="uzenet"><span class="felhasznalo">${u.ki}</span><p style="margin:5px 0 0 0;">${u.mi}</p></div>`;
+                });
+            }
+        }
+
+        // Üzenet küldése Enterre
+        function uzenetKuld(e) {
+            if(e.key === 'Enter') {
+                let input = document.getElementById('uzenetInput');
+                if(input.value.trim() !== '') {
+                    if(!uzenetek[jelenlegiCsatorna]) uzenetek[jelenlegiCsatorna] = [];
+                    
+                    uzenetek[jelenlegiCsatorna].push({
+                        ki: 'Te (Felhasználó)',
+                        mi: input.value
+                    });
+                    
+                    input.value = '';
+                    frissitChatet();
+                }
+            }
+        }
+
+        // Szerver létrehozás szimuláció
+        function ujSzerver() {
+            let nev = prompt('Add meg az új szerver nevét:');
+            if(nev) {
+                let lista = document.getElementById('szerverLista');
+                let ujGomb = document.createElement('div');
+                ujGomb.className = 'szerver-ikon';
+                ujGomb.innerText = nev.substring(0,2).toUpperCase();
+                ujGomb.onclick = function() {
+                    document.getElementById('szerverNev').innerText = nev;
+                };
+                lista.insertBefore(ujGomb, lista.lastChild);
+            }
+        }
+
+        // Hanghívás szimuláció
+        function hanghozCsatlakozik(nev) {
+            document.getElementById('hangPanel').style.display = 'flex';
+            document.getElementById('hangCsatornaNev').innerText = nev;
+        }
+
+        function bontas() {
+            document.getElementById('hangPanel').style.display = 'none';
+        }
+
+        // Első betöltés
+        frissitChatet();
+    </script>
 </body>
 </html>
+
