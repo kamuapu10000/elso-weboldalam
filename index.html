@@ -2,10 +2,154 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-    <title>Az Első GitHub Weboldalam</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Másolat - Téma váltóval</title>
+    <style>
+        /* SÖTÉT MÓD ALAPÉRTELMEZETT STÍLUSAI */
+        body {
+            background-color: #313338;
+            color: #dbdee1;
+            font-family: sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            transition: all 0.3s ease; /* Finom átmenet a váltáskor */
+        }
+        .szerverek {
+            background-color: #1e1f22;
+            width: 70px;
+            padding: 10px 0;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+        .csatornak {
+            background-color: #2b2d31;
+            width: 240px;
+            padding: 20px;
+            transition: background-color 0.3s;
+        }
+        .csevegő {
+            background-color: #313338;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+        .csatorna-nev {
+            color: #949ba4;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        .uzenet {
+            margin-bottom: 15px;
+        }
+        .felhasznalo {
+            color: #f2f3f5;
+            font-weight: bold;
+        }
+        .beviteli-mezo {
+            background-color: #383a40;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            color: #dbdee1;
+            width: 95%;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* GOMB STÍLUSA */
+        .valto-gomb {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background-color: #5865F2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* VILÁGOS (FEHÉR-FEKETE) MÓD STÍLUSA */
+        body.light-mode {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        body.light-mode .szerverek {
+            background-color: #e3e5e8;
+        }
+        body.light-mode .csatornak {
+            background-color: #f2f3f5;
+        }
+        body.light-mode .csevegő {
+            background-color: #ffffff;
+        }
+        body.light-mode .felhasznalo {
+            color: #060607;
+        }
+        body.light-mode .csatorna-nev {
+            color: #4e5058;
+        }
+        body.light-mode .beviteli-mezo {
+            background-color: #ebedef;
+            color: #060607;
+            border: 1px solid #ccc;
+        }
+    </style>
 </head>
 <body>
-    <h1>Szia Világ a GitHubon!</h1>
-    <p>Ez a weboldal már az interneten él.</p>
+
+    <!-- 1. Bal oldali sáv -->
+    <div class="szerverek">
+        <h3 style="color: #5865F2;">🎮</h3>
+        <p>🏠</p>
+        <p>➕</p>
+    </div>
+
+    <!-- 2. Középső sáv -->
+    <div class="csatornak">
+        <h2>Saját Szerver</h2>
+        <hr style="border-color: #3f4147;">
+        <p style="font-size: 12px; text-transform: uppercase;">Szöveges csatornák</p>
+        <div class="csatorna-nev"># 💬 általános</div>
+        <div class="csatorna-nev"># 🤖 bot-parancsok</div>
+        <div class="csatorna-nev"># 📷 mémek</div>
+    </div>
+
+    <!-- 3. Jobb oldali rész -->
+    <div class="csevegő">
+        <!-- Ez a gomb fogja kapcsolni a módot -->
+        <button class="valto-gomb" onclick="temaValtas()">Sötét / Világos mód</button>
+
+        <div>
+            <h2># általános</h2>
+            <hr style="border-color: #3f4147;">
+            
+            <div class="uzenet">
+                <span class="felhasznalo">Admin_Péter</span>
+                <p style="margin: 5px 0 0 0;">Sziasztok! Próbáljátok ki a jobb felső sarokban lévő gombot!</p>
+            </div>
+
+            <div class="uzenet">
+                <span class="felhasznalo">TesztElek</span>
+                <p style="margin: 5px 0 0 0;">Wow, ez azonnal átvált fehér-fekete módra! 🌓</p>
+            </div>
+        </div>
+
+        <input type="text" class="beviteli-mezo" placeholder="Üzenet küldése a(z) #általános csatornába">
+    </div>
+
+    <!-- JAVASCRIPT KÓD A VÁLTÁSHOZ -->
+    <script>
+        function temaValtas() {
+            // A JavaScript hozzáadja vagy elveszi a "light-mode" osztályt a teljes oldalból (body)
+            document.body.classList.toggle("light-mode");
+        }
+    </script>
+
 </body>
 </html>
